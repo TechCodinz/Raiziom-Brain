@@ -1,5 +1,2 @@
-# Raiziom Brain — Flask Backend
-
-This is the real working backend of Raiziom with active Paiddail logic.
-...
-
+# Raiziom Brain V3
+This is the full control system for all divine apps.
