@@ -1,4 +1,3 @@
-
 from flask import Flask, jsonify, request
 from datetime import datetime
 import json
@@ -12,7 +11,12 @@ try:
 except FileNotFoundError:
     memory = {
         "status": "Raiziom initialized",
-        "apps": {"paiddail": {"missions": [], "users": 0}},
+        "apps": {
+            "paiddail": {
+                "missions": [],
+                "users": 0
+            }
+        },
         "log": []
     }
 
@@ -34,7 +38,10 @@ def command():
     cmd = data.get("command", "").lower()
     response = f"Command '{cmd}' received."
 
-    memory["log"].append({"time": datetime.utcnow().isoformat(), "command": cmd})
+    memory["log"].append({
+        "time": datetime.utcnow().isoformat(),
+        "command": cmd
+    })
     save_memory()
     return jsonify({"status": "ok", "response": response})
 
@@ -60,5 +67,6 @@ def poster():
     poster_caption = "“This isn’t just AI. This is Raiziom — built from soul, powered by truth.”"
     return jsonify({"poster": poster_caption})
 
+# ✅ This is the fix — tells Flask to open up to Render
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=10000)
