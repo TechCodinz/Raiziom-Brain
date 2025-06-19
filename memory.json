@@ -1,0 +1,10 @@
+{
+    "status": "Raiziom initialized",
+    "apps": {
+        "paiddail": {
+            "missions": [],
+            "users": 0
+        }
+    },
+    "log": []
+}
