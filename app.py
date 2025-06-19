@@ -26,11 +26,16 @@ def save_memory():
 
 @app.route("/")
 def index():
+    apps_list = []
+    if "apps" in memory:
+        apps_list = list(memory["apps"].keys())
+    elif "active_apps" in memory:
+        apps_list = memory["active_apps"]
     return jsonify({
-        "message": "Raiziom Brain Active",
-        "time": datetime.utcnow().isoformat(),
-        "apps_managed": list(memory["apps"].keys())
+        "message": "Raiziom Brain is Active",
+        "apps_managed": apps_list
     })
+
 
 @app.route("/command", methods=["POST"])
 def command():

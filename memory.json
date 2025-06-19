@@ -1,10 +1,5 @@
 {
-    "status": "Raiziom initialized",
-    "apps": {
-        "paiddail": {
-            "missions": [],
-            "users": 0
-        }
-    },
-    "log": []
+  "active_apps": ["raiziom_core", "paiddail", "sernda", "spernda"],
+  "dormant_apps": ["elevate", "voting_app", "echofundia"],
+  "logs": []
 }
