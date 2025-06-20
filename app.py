@@ -1,21 +1,42 @@
 from flask import Flask, render_template, jsonify
 import json
 import requests
+from datetime import datetime
 
 app = Flask(__name__)
 
 # Load memory
-with open("memory.json", "r") as f:
-    memory = json.load(f)
+try:
+    with open("memory.json") as f:
+        memory = json.load(f)
+except FileNotFoundError:
+    memory = {
+        "status": "Raiziom initialized",
+        "apps": {
+            "paiddail": {
+                "missions": [],
+                "users": 0
+            }
+        },
+        "log": []
+    }
 
+# Save memory helper
+def save_memory():
+    with open("memory.json", "w") as f:
+        json.dump(memory, f, indent=2)
+
+# Homepage
 @app.route("/")
-def home():
-    return render_template("home.html", memory=memory)
+def index():
+    return "Raiziom Brain V3 is live."
 
+# Apps route (lists active apps)
 @app.route("/apps")
 def apps():
     return render_template("apps.html", apps=memory.get("active_apps", []))
 
+# Missions route (from Paiddail)
 @app.route("/missions")
 def missions():
     try:
@@ -33,15 +54,15 @@ def missions():
     except Exception as e:
         print("ERROR:", e)
         missions = [{"task": "Error loading missions", "reward": 0}]
+    
     return render_template("missions.html", missions=missions)
 
-@app.route("/console")
-def console():
-    return render_template("console.html")
+# Poster route
+@app.route("/poster", methods=["GET"])
+def poster():
+    poster_caption = "This isn’t just AI. This is Raiziom — built from soul, powered by truth."
+    return jsonify({"poster": poster_caption})
 
-@app.route("/settings")
-def settings():
-    return render_template("settings.html", memory=memory)
-
+# Run app on Render
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
