@@ -1,4 +1,4 @@
-# ✅ Paiddail logic for mission handling
+# paiddail/logic.py
 
 missions = [
     {"id": 1, "task": "Invite 5 people to Paiddail", "reward": 100},
@@ -16,7 +16,5 @@ def log_task(data):
     return {"message": "Task logged", "data": data}
 
 def get_user_data():
-    return {
-        "logs": user_logs,
-        "total_earned": sum(log["reward"] for log in user_logs if "reward" in log)
-    }
+    total = sum(log["reward"] for log in user_logs if "reward" in log)
+    return {"logs": user_logs, "total_earned": total}
