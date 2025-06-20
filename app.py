@@ -1,72 +1,47 @@
-from flask import Flask, jsonify, request
-from datetime import datetime
+from flask import Flask, render_template, jsonify
 import json
+import requests
 
 app = Flask(__name__)
 
 # Load memory
-try:
-    with open("memory.json", "r") as f:
-        memory = json.load(f)
-except FileNotFoundError:
-    memory = {
-        "status": "Raiziom initialized",
-        "apps": {
-            "paiddail": {
-                "missions": [],
-                "users": 0
-            }
-        },
-        "log": []
-    }
-
-def save_memory():
-    with open("memory.json", "w") as f:
-        json.dump(memory, f, indent=4)
+with open("memory.json", "r") as f:
+    memory = json.load(f)
 
 @app.route("/")
-def index():
-    return jsonify({
-        "message": "Raiziom Brain Active",
-        "time": datetime.utcnow().isoformat(),
-        "apps_managed": list(memory["apps"].keys())
-    })
+def home():
+    return render_template("home.html", memory=memory)
 
-@app.route("/command", methods=["POST"])
-def command():
-    data = request.json
-    cmd = data.get("command", "").lower()
-    response = f"Command '{cmd}' received."
+@app.route("/apps")
+def apps():
+    return render_template("apps.html", apps=memory.get("active_apps", []))
 
-    memory["log"].append({
-        "time": datetime.utcnow().isoformat(),
-        "command": cmd
-    })
-    save_memory()
-    return jsonify({"status": "ok", "response": response})
+@app.route("/missions")
+def missions():
+    try:
+        r = requests.get("https://raiziom-brain.onrender.com/paiddail/missions")
+        print("STATUS:", r.status_code)
+        print("RAW TEXT:", r.text)
 
-@app.route("/paiddail/mission", methods=["POST"])
-def add_mission():
-    data = request.json
-    mission = data.get("mission", "")
-    if mission:
-        memory["apps"]["paiddail"]["missions"].append({
-            "mission": mission,
-            "created": datetime.utcnow().isoformat()
-        })
-        save_memory()
-        return jsonify({"status": "ok", "message": "Mission added."})
-    return jsonify({"status": "error", "message": "No mission provided."}), 400
+        data = r.json()
+        if isinstance(data, dict) and "missions" in data:
+            missions = data["missions"]
+        elif isinstance(data, list):
+            missions = data
+        else:
+            missions = [{"task": "Unexpected data format", "reward": 0}]
+    except Exception as e:
+        print("ERROR:", e)
+        missions = [{"task": "Error loading missions", "reward": 0}]
+    return render_template("missions.html", missions=missions)
 
-@app.route("/paiddail/missions", methods=["GET"])
-def list_missions():
-    return jsonify(memory["apps"]["paiddail"]["missions"])
+@app.route("/console")
+def console():
+    return render_template("console.html")
 
-@app.route("/poster", methods=["GET"])
-def poster():
-    poster_caption = "“This isn’t just AI. This is Raiziom — built from soul, powered by truth.”"
-    return jsonify({"poster": poster_caption})
+@app.route("/settings")
+def settings():
+    return render_template("settings.html", memory=memory)
 
-# ✅ This is the fix — tells Flask to open up to Render
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=10000)
+    app.run(host="0.0.0.0", port=10000)
